@@ -1,6 +1,6 @@
 # Copyright (C) 2011 Nippon Telegraph and Telephone Corporation.
 # Licensed under the Apache License, Version 2.0
-# 
+#
 # CONTROLLER MESH - BELLMAN FORD (FINAL TUNED VERSION)
 # Tuned for Mesh 20+ Nodes:
 # 1. BATCHING: Interval update dinaikkan ke 20 detik (Sangat Santai).
@@ -28,10 +28,10 @@ class BellmanMeshController(app_manager.RyuApp):
         self.hosts = {}
         self.net = nx.DiGraph()
         self.mst = None
-        self.port_map = {} 
-        self.last_log_info = (-1, -1, "") 
+        self.port_map = {}
+        self.last_log_info = (-1, -1, "")
         self.logger.info("BellmanMeshController: Siap (Tuned 20s Batch).")
-        
+       
         hub.spawn(self._monitor_topology)
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
@@ -72,9 +72,9 @@ class BellmanMeshController(app_manager.RyuApp):
     def _build_optimal_topology(self):
         switches = topology_api.get_switch(self.topology_api_app, None)
         links = topology_api.get_link(self.topology_api_app, None)
-        
+       
         temp_net = nx.DiGraph()
-        temp_port_map = {} 
+        temp_port_map = {}
 
         for switch in switches:
             dpid = switch.dp.id
@@ -84,15 +84,15 @@ class BellmanMeshController(app_manager.RyuApp):
         for link in links:
             src, dst = link.src.dpid, link.dst.dpid
             src_port, dst_port = link.src.port_no, link.dst.port_no
-            
+           
             temp_net.add_edge(src, dst, port=src_port)
             temp_net.add_edge(dst, src, port=dst_port)
-            
+           
             if src in temp_port_map: temp_port_map[src][src_port] = dst
             if dst in temp_port_map: temp_port_map[dst][dst_port] = src
-        
+       
         self.net = temp_net
-        self.port_map = temp_port_map 
+        self.port_map = temp_port_map
 
         if len(self.net.nodes) > 0:
             try:
@@ -108,10 +108,10 @@ class BellmanMeshController(app_manager.RyuApp):
             link_status = len(self.net.edges)
             ready_msg = "PARTIAL"
             if self.mst: ready_msg = "FULL/MST READY"
-            
+           
             current_info = (len(self.net.nodes), link_status, ready_msg)
             if current_info != self.last_log_info:
-                self.logger.info(">>> Mesh Update: %d Switch, %d Link (Status: %s)", 
+                self.logger.info(">>> Mesh Update: %d Switch, %d Link (Status: %s)",
                                  len(self.net.nodes), link_status, ready_msg)
                 self.last_log_info = current_info
 
@@ -124,10 +124,10 @@ class BellmanMeshController(app_manager.RyuApp):
         all_ports = [p.port_no for p in datapath.ports.values() if p.port_no <= datapath.ofproto.OFPP_MAX]
         dpid = datapath.id
         local_map = self.port_map.get(dpid, {})
-        
+       
         for port_no in all_ports:
             if port_no == in_port: continue
-            
+           
             neighbor_dpid = local_map.get(port_no)
             if neighbor_dpid:
                 if self.mst.has_edge(dpid, neighbor_dpid):
@@ -155,7 +155,7 @@ class BellmanMeshController(app_manager.RyuApp):
 
         dst = eth.dst
         src = eth.src
-        
+       
         if src not in self.hosts:
             self.hosts[src] = (dpid, in_port)
 
@@ -164,14 +164,14 @@ class BellmanMeshController(app_manager.RyuApp):
             return
 
         dst_dpid = self.hosts[dst][0]
-        
+       
         if dpid == dst_dpid:
             actions = [parser.OFPActionOutput(self.hosts[dst][1])]
         else:
             if not self.net.edges or not self.mst:
                 self._intelligent_flood(datapath, in_port, msg)
                 return
-            
+           
             try:
                 path = tpool.execute(nx.shortest_path, self.net, dpid, dst_dpid, weight=None, method='bellman-ford')
                 next_hop = path[path.index(dpid) + 1]
@@ -182,7 +182,7 @@ class BellmanMeshController(app_manager.RyuApp):
 
         match = parser.OFPMatch(eth_dst=dst)
         self.add_flow(datapath, 1, match, actions)
-        
+       
         out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
                                   in_port=in_port, actions=actions, data=msg.data)
         datapath.send_msg(out)

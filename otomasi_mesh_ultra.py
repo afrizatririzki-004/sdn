@@ -100,13 +100,15 @@ def run_mesh_test(nodes_or_k, algo_name="JOHNSON_COOLDOWN"):
     elif nodes_or_k <= 20:
         wait_time = 70 # Dinaikkan dari 30s ke 60s
     elif nodes_or_k <= 30:
-        wait_time = 90
+        wait_time = 240
     elif nodes_or_k <= 45:
         wait_time = 200
     elif nodes_or_k <= 50:
         wait_time = 550 # Dinaikkan ke 2 menit
+    elif nodes_or_k <= 80:
+        wait_time = 900 # Dinaikkan ke 2 menit
     else:
-        wait_time = 180
+        wait_time = 1200
    
     info(f"*** Waiting {wait_time} seconds for Topology Stability & Calculation...\n")
     time.sleep(wait_time)
@@ -141,4 +143,4 @@ if __name__ == '__main__':
     setLogLevel('info')
    
     # Jalankan Test
-    run_mesh_test(50, algo_name="OPTIMIZED_COOLDOWN")
+    run_mesh_test(50, algo_name="Johnson")

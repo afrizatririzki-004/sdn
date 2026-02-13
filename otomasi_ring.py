@@ -142,6 +142,7 @@ def run_automated_test(topo_type, nodes_or_k):
     
     info(f"\n{'='*40}\nLaporan Akhir {topo_type.upper()}\n{'='*40}\n")
     info(f"Topology: {topo_type} (Scale: {nodes_or_k})\n")
+    info(f"Algoritma Bellmanford \n")
     info(f"Convergence Time: {conv_time if conv_time else '> Timeout'}\n")
     info(f"Throughput      : {th_val}\n")
     info(f"Recovery Time   : {rec_time}\n")
@@ -161,7 +162,7 @@ if __name__ == '__main__':
 
     #run_automated_test('ring', 10)
     #run_automated_test('ring', 50)
-    run_automated_test('ring', 100) # <-- Kita tes yang ini sekarang
+    #run_automated_test('ring', 30) 
     
     # run_automated_test('mesh', 10)
 
