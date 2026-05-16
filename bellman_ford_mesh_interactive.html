@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritma Bellman-Ford pada Topologi Mesh - Pembelajaran Interaktif</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        nav {
+            background: var(--dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            overflow-x: auto;
+            padding: 0 1rem;
+        }
+
+        nav a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-color: var(--accent);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            scroll-margin-top: 80px;
+        }
+
+        section h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        section h3 {
+            color: var(--primary-dark);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .interactive-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .interactive-box h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin: 0.25rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background: #d97706;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+
+        .diagram {
+            background: var(--light);
+            border: 2px dashed var(--gray);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid var(--secondary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .collapsible {
+            background: var(--light);
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            padding: 1rem 1.5rem;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible-header:hover {
+            background: #e5e7eb;
+        }
+
+        .collapsible-content {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .collapsible.open .collapsible-content {
+            max-height: 500px;
+            padding: 1rem 1.5rem;
+        }
+
+        .step-container {
+            display: grid;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .step {
+            background: white;
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .step.active {
+            border-left-color: var(--secondary);
+            background: #d1fae5;
+            transform: translateX(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .step-number {
+            position: absolute;
+            left: -20px;
+            top: 1rem;
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .step.active .step-number {
+            background: var(--secondary);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            transition: width 0.3s ease;
+        }
+
+        .quiz {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-question {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .quiz-option.incorrect {
+            background: #ef4444;
+            color: white;
+        }
+
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        .quiz-feedback.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .quiz-feedback.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .network-viz {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--light);
+            border: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 0 8px 8px 8px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .formula {
+            background: var(--dark);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            section {
+                padding: 1rem;
+            }
+
+            section h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Algoritma Bellman-Ford pada Topologi Mesh</h1>
+        <p>Materi Pembelajaran Interaktif untuk Penelitian Algoritma Routing SDN</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#pendahuluan" class="active">Pendahuluan</a></li>
+            <li><a href="#mesh">Topologi Mesh</a></li>
+            <li><a href="#bellman-ford">Bellman-Ford</a></li>
+            <li><a href="#controller">Controller</a></li>
+            <li><a href="#visualisasi">Visualisasi</a></li>
+            <li><a href="#simulasi">Simulasi</a></li>
+            <li><a href="#kuis">Kuis</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Section 1: Pendahuluan -->
+        <section id="pendahuluan">
+            <h2>Pendahuluan</h2>
+
+            <div class="collapsible" id="col-intro">
+                <div class="collapsible-header" onclick="toggleCol('col-intro')">
+                    <span>Tentang Materi Ini</span>
+                    <span>▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <p>Materi pembelajaran interaktif ini menjelaskan implementasi <strong>algoritma routing Bellman-Ford</strong> pada <strong>topologi Mesh</strong> menggunakan <strong>Ryu SDN Controller</strong> dan <strong>emulator Mininet</strong>.</p>
+
+                    <div class="info-box">
+                        <strong>Sasaran:</strong> Mahasiswa, peneliti, dan insinyur jaringan yang tertarik dengan SDN dan algoritma routing.
+                    </div>
+
+                    <div class="success-box">
+                        <strong>Tujuan Pembelajaran:</strong>
+                        <ul>
+                            <li>Memahami struktur dan karakteristik topologi Mesh</li>
+                            <li>Mempelajari algoritma Bellman-Ford langkah demi langkah</li>
+                            <li>Mengeksplorasi implementasi SDN controller</li>
+                            <li>Memvisualisasikan aliran paket dan routing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Apa itu Software Defined Networking (SDN)?</h3>
+            <div class="info-box">
+                <p><strong>SDN</strong> memisahkan <strong>control plane</strong> (keputusan routing) dari <strong>data plane</strong> (penerusan paket).</p>
+                <ul>
+                    <li><strong>Control Plane:</strong> Ryu Controller - membuat keputusan routing</li>
+                    <li><strong>Data Plane:</strong> OpenFlow Switches - meneruskan paket</li>
+                    <li><strong>Keuntungan:</strong> Centralized control, programmable, flexible</li>
+                </ul>
+            </div>
+
+            <h3>Apa itu Ryu?</h3>
+            <div class="info-box">
+                <p><strong>Ryu</strong> adalah framework SDN berbasis komponen dengan dukungan OpenFlow (1.0 - 1.5) dan API Python.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Topologi Mesh -->
+        <section id="mesh">
+            <h2>Topologi Mesh</h2>
+
+            <h3>Apa itu Topologi Mesh?</h3>
+            <p>Topologi Mesh adalah konfigurasi jaringan dimana <strong>setiap node terhubung langsung ke semua node lainnya</strong>. Ini menciptakan <strong>graf lengkap</strong> dengan redundansi maksimum.</p>
+
+            <div class="interactive-box">
+                <h4>Visualisasi Interaktif</h4>
+                <div class="diagram">
+                    <svg width="400" height="400" viewBox="0 0 400 400" id="mesh-svg"></svg>
+                </div>
+                <button class="btn" onclick="gantiMesh(3)">3 Node</button>
+                <button class="btn" onclick="gantiMesh(4)">4 Node</button>
+                <button class="btn" onclick="gantiMesh(5)">5 Node</button>
+                <button class="btn" onclick="gantiMesh(6)">6 Node</button>
+                <p style="margin-top: 1rem;">
+                    <strong>Node:</strong> <span id="node-count">5</span> |
+                    <strong>Tautan:</strong> <span id="link-count">10</span>
+                </p>
+            </div>
+
+            <h3>Rumus Topologi Mesh</h3>
+            <div class="formula">
+                Jumlah Tautan = N × (N - 1) / 2
+            </div>
+
+            <table>
+                <tr>
+                    <th>Node (N)</th>
+                    <th>Total Tautan</th>
+                </tr>
+                <tr><td>5</td><td>10</td></tr>
+                <tr><td>10</td><td>45</td></tr>
+                <tr><td>50</td><td>1.225</td></tr>
+                <tr><td>100</td><td>4.950</td></tr>
+            </table>
+
+            <div class="success-box">
+                <h4>Kelebihan:</h4>
+                <ul>
+                    <li><strong>Redundansi Tinggi:</strong> Banyak jalur antara dua node</li>
+                    <li><strong>Toleransi Kesalahan:</strong> Jaringan bertahan dari kegagalan tautan</li>
+                    <li><strong>Jalur Pendek:</strong> Koneksi langsung 1 hop antar node</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <h4>Kekurangan:</h4>
+                <ul>
+                    <li><strong>Biaya:</strong> Membutuhkan banyak kabel/port</li>
+                    <li><strong>Kompleksitas:</strong> Sulit dikelola skala besar</li>
+                    <li><strong>Skalabilitas:</strong> Tidak praktis > ~100 node</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3: Bellman-Ford -->
+        <section id="bellman-ford">
+            <h2>Algoritma Bellman-Ford</h2>
+
+            <h3>Apa itu Bellman-Ford?</h3>
+            <div class="info-box">
+                <p><strong>Algoritma Bellman-Ford</strong> mencari <strong>jalur terpendek</strong> dari satu sumber ke semua vertex dalam graf berbobot.</p>
+                <p><strong>Ditemukan oleh:</strong> Richard Bellman dan Lester Ford Jr. (1958-1962)</p>
+                <p><strong>Keunggulan:</strong> Dapat menangani bobot negatif (tidak seperti Dijkstra)</p>
+            </div>
+
+            <h3>Prinsip Relaksasi</h3>
+            <div class="formula">
+                d[v] > d[u] + w(u,v) → d[v] = d[u] + w(u,v)
+            </div>
+            <p>Jika jalur melalui u ke v lebih pendek, update jarak ke v!</p>
+
+            <h3>Visualisasi Interaktif</h3>
+            <div class="interactive-box">
+                <h4>Langkah demi Langkah</h4>
+                <div class="diagram">
+                    <svg width="500" height="300" viewBox="0 0 500 300" id="relax-svg"></svg>
+                </div>
+                <button class="btn" onclick="nextRelax()">Langkah Berikutnya →</button>
+                <button class="btn btn-secondary" onclick="resetRelax()">Atur Ulang</button>
+                <div id="relax-status" style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 6px;">
+                    <strong>Status:</strong> <span>Klik "Langkah Berikutnya" untuk mulai</span>
+                </div>
+            </div>
+
+            <h3>Pseudocode</h3>
+            <div class="code-block"><code>function BellmanFord(Graph, sumber):
+    for setiap vertex v:
+        jarak[v] = TAK_HINGGA
+    jarak[sumber] = 0
+
+    for i = 1 to |V| - 1:
+        for setiap edge (u, v) dengan bobot w:
+            if jarak[u] + w < jarak[v]:
+                jarak[v] = jarak[u] + w
+
+    return jarak[]</code></div>
+
+            <h3>Kompleksitas</h3>
+            <div class="interactive-box">
+                <h4>Kalkulator Kompleksitas</h4>
+                <label>Jumlah node: <input type="number" id="calc-n" value="10" min="3" max="100" style="width: 60px; padding: 0.5rem;"></label>
+                <button class="btn" onclick="hitungKompleksitas()">Hitung</button>
+                <div id="calc-result" style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 6px;">
+                    Klik "Hitung" untuk hasil
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Controller -->
+        <section id="controller">
+            <h2>Implementasi Controller</h2>
+
+            <h3>Arsitektur</h3>
+            <div class="info-box">
+                <p><strong>BellmanMeshUltraController</strong> memiliki komponen utama:</p>
+                <ul>
+                    <li><strong>Topology Monitor:</strong> Menemukan switch/tautan setiap 10 detik</li>
+                    <li><strong>Calculator:</strong> Bellman-Ford di thread latar belakang</li>
+                    <li><strong>Gatekeeper:</strong> Memblokir lalu lintas selama boot</li>
+                    <li><strong>Packet Handler:</strong> Memproses paket masuk</li>
+                </ul>
+            </div>
+
+            <h3>Simulasi Boot</h3>
+            <div class="interactive-box">
+                <h4>Fase Boot Controller</h4>
+                <div class="progress-container">
+                    <div class="progress-bar" id="boot-bar" style="width: 0%;">0%</div>
+                </div>
+                <button class="btn" onclick="mulaiBoot()">Mulai Simulasi</button>
+                <button class="btn btn-secondary" onclick="resetBoot()">Atur Ulang</button>
+                <div id="boot-log" style="margin-top: 1rem; padding: 1rem; background: #1e1e1e; color: #10b981; border-radius: 6px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.875rem;">
+                    [BOOT] Menunggu...
+                </div>
+            </div>
+
+            <h3>Struktur Data</h3>
+            <div class="tabs">
+                <button class="tab active" onclick="gantiTab(this, 'tab-net')">self.net</button>
+                <button class="tab" onclick="gantiTab(this, 'tab-port')">self.port_map</button>
+                <button class="tab" onclick="gantiTab(this, 'tab-host')">self.hosts</button>
+            </div>
+            <div class="tab-content active" id="tab-net">
+                <div class="code-block"><code>self.net = nx.DiGraph()
+# Graf jaringan dengan bobot edge = 1
+# Digunakan untuk Bellman-Ford</code></div>
+            </div>
+            <div class="tab-content" id="tab-port">
+                <div class="code-block"><code>self.port_map = {
+    s1: {2: s3, 3: s2, 4: s4},
+    s2: {1: s1, 4: s3, 5: s4},
+}
+# Port → neighbor switch</code></div>
+            </div>
+            <div class="tab-content" id="tab-host">
+                <div class="code-block"><code>self.hosts = {
+    "00:00:00:00:00:01": (s1, 1),
+    "00:00:00:00:00:02": (s2, 1),
+}
+# MAC → (switch, port)</code></div>
+            </div>
+        </section>
+
+        <!-- Section 5: Visualisasi -->
+        <section id="visualisasi">
+            <h2>Visualisasi Jaringan</h2>
+
+            <div class="network-viz">
+                <canvas id="canvas" width="700" height="400"></canvas>
+            </div>
+
+            <div class="interactive-box">
+                <h4>Kontrol</h4>
+                <p>Jumlah Node: <input type="range" id="slider" min="3" max="10" value="6" oninput="document.getElementById('slider-val').textContent = this.value; buatJaringan();"> <span id="slider-val">6</span></p>
+                <button class="btn" onclick="buatJaringan()">Buat Jaringan</button>
+                <button class="btn btn-secondary" onclick="hapusFlow()">Hapus Flow</button>
+                <button class="btn btn-accent" onclick="kirimPaket()">Kirim Paket</button>
+            </div>
+
+            <div style="padding: 1rem; background: var(--light); border-radius: 6px;">
+                <strong>Status Flow:</strong> <span id="flow-status">Tidak ada flow aktif</span>
+            </div>
+        </section>
+
+        <!-- Section 6: Simulasi -->
+        <section id="simulasi">
+            <h2>Simulasi Aliran Paket</h2>
+
+            <div class="interactive-box">
+                <h4>Simulasi Ping h1 → h50</h4>
+                <div id="sim-container" class="step-container">
+                    <!-- Steps generated by JS -->
+                </div>
+                <button class="btn" onclick="nextSim()">Langkah Berikutnya</button>
+                <button class="btn btn-secondary" onclick="resetSim()">Atur Ulang</button>
+                <button class="btn btn-accent" onclick="autoSim()">Putar Otomatis</button>
+            </div>
+
+            <div id="sim-state" style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 6px;">
+                <strong>Status:</strong> <span>Siap untuk memulai</span>
+            </div>
+        </section>
+
+        <!-- Section 7: Kuis -->
+        <section id="kuis">
+            <h2>Kuis</h2>
+
+            <div class="quiz">
+                <div class="quiz-question">1. Berapa jumlah tautan di mesh 10 node?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">A. 10</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, true)">B. 45</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">C. 90</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">D. 100</div>
+                </div>
+                <div class="quiz-feedback">Benar! Rumus: N × (N-1) / 2 = 10 × 9 / 2 = 45</div>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-question">2. Apa tujuan waktu kunci 700 detik?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">A. Memperlambat jaringan</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, true)">B. Memastikan topologi stabil sebelum routing</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">C. Menghemat CPU</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">D. Bug dalam kode</div>
+                </div>
+                <div class="quiz-feedback">Benar! Kunci mencegah kesalahan routing selama konvergensi.</div>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-question">3. Di mesh terhubung lengkap, jalur terpendek s1 ke s50?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">A. 49 hop</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, true)">B. 1 hop (langsung)</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">C. Bergantung beban</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">D. Tidak tahu</div>
+                </div>
+                <div class="quiz-feedback">Benar! Di mesh, semua node terhubung langsung.</div>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-question">4. Apa kepanjangan MST?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="cekJawaban(this, true)">A. Minimum Spanning Tree</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">B. Maximum Speed Transfer</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">C. Mesh Switch Topology</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">D. Multi Source Table</div>
+                </div>
+                <div class="quiz-feedback">Benar! MST mengurangi flooding ARP.</div>
+            </div>
+
+            <div class="quiz">
+                <div class="quiz-question">5. Kompleksitas Bellman-Ford semua pasangan?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">A. O(V)</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">B. O(V × E)</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, true)">C. O(V² × E)</div>
+                    <div class="quiz-option" onclick="cekJawaban(this, false)">D. O(E²)</div>
+                </div>
+                <div class="quiz-feedback">Benar! O(V×E) × V = O(V² × E)</div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn" onclick="resetKuis()">Atur Ulang Kuis</button>
+                <p style="margin-top: 1rem;"><strong>Skor:</strong> <span id="quiz-skor">0</span> / 5</p>
+            </div>
+        </section>
+
+        <section style="text-align: center;">
+            <p style="color: var(--gray);">Berdasarkan implementasi <code>BellmanMeshUltraController.py</code></p>
+            <p style="color: var(--gray); font-size: 0.875rem;">Dibuat untuk Penelitian Algoritma Routing SDN</p>
+        </section>
+    </main>
+
+    <script>
+        // ==================== VARIABLES ====================
+        let meshNode = 5;
+        let relaxStep = 0;
+        let bootProg = 0;
+        let bootTimer = null;
+        let simIdx = 0;
+        let autoTimer = null;
+        let quizSkor = 0;
+        let nodes = [];
+        let flows = [];
+        let animId = null;
+        let packetProg = 0;
+        let isAnimating = false;
+
+        const SIM_STEPS = [
+            {t: "T=0s", title: "Controller Mulai", desc: "is_ready=False"},
+            {t: "T=10s", title: "Penemuan", desc: "50 switch, 1225 tautan"},
+            {t: "T=100s", title: "Menghitung", desc: "Bellman-Ford berjalan"},
+            {t: "T=550s", title: "Tunggu Selesai", desc: "Skrip otomasi selesai"},
+            {t: "T=700s", title: "Lalu Lintas Diizinkan", desc: "is_ready=True"},
+            {t: "T=701s", title: "Ping Mulai", desc: "h1 kirim ping ke h50"},
+            {t: "T=701s", title: "Packet-In", desc: "s1 → controller"},
+            {t: "T=702s", title: "ARP Flood", desc: "Via MST (49 edge)"},
+            {t: "T=703s", title: "Balasan ARP", desc: "Controller belajar MAC"},
+            {t: "T=704s", title: "Routing", desc: "[s1, s50] ditemukan"},
+            {t: "T=705s", title: "Pasang Flow", desc: "Flow terpasang"},
+            {t: "T=708s", title: "Berhasil!", desc: "Waktu Konvergensi = 8 detik"}
+        ];
+
+        // ==================== COLLAPSIBLE ====================
+        function toggleCol(id) {
+            document.getElementById(id).classList.toggle('open');
+        }
+
+        // ==================== MESH TOPOLOGY ====================
+        function gambarMesh(n) {
+            meshNode = n;
+            document.getElementById('node-count').textContent = n;
+            document.getElementById('link-count').textContent = n * (n - 1) / 2;
+
+            const svg = document.getElementById('mesh-svg');
+            const pos = [];
+            const cx = 200, cy = 200, r = 120;
+
+            for (let i = 0; i < n; i++) {
+                const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+                pos.push({
+                    x: cx + r * Math.cos(angle),
+                    y: cy + r * Math.sin(angle)
+                });
+            }
+
+            let html = '';
+            for (let i = 0; i < n; i++) {
+                for (let j = i + 1; j < n; j++) {
+                    html += `<line x1="${pos[i].x}" y1="${pos[i].y}" x2="${pos[j].x}" y2="${pos[j].y}" stroke="#94a3b8" stroke-width="2"/>`;
+                }
+            }
+            for (let i = 0; i < n; i++) {
+                html += `<circle cx="${pos[i].x}" cy="${pos[i].y}" r="25" fill="${i === 0 ? '#10b981' : '#2563eb'}"/>`;
+                html += `<text x="${pos[i].x}" y="${pos[i].y + 5}" text-anchor="middle" fill="white" font-weight="bold">s${i + 1}</text>`;
+            }
+            svg.innerHTML = html;
+        }
+
+        function gantiMesh(n) {
+            gambarMesh(n);
+        }
+
+        // ==================== RELAXATION ====================
+        function gambarRelax() {
+            const svg = document.getElementById('relax-svg');
+            const pos = [
+                {x: 80, y: 150},
+                {x: 200, y: 50},
+                {x: 200, y: 250},
+                {x: 350, y: 150}
+            ];
+            const edges = [[0,1], [0,2], [1,2], [1,3], [2,3], [0,3]];
+            const hiEdge = relaxStep >= 0 && relaxStep < 6 ? relaxStep : -1;
+
+            let html = '';
+            edges.forEach(([i, j], idx) => {
+                html += `<line x1="${pos[i].x}" y1="${pos[i].y}" x2="${pos[j].x}" y2="${pos[j].y}" stroke="${idx === hiEdge ? '#10b981' : '#64748b'}" stroke-width="${idx === hiEdge ? 4 : 2}"/>`;
+            });
+            ['s1', 's2', 's3', 's4'].forEach((label, i) => {
+                html += `<circle cx="${pos[i].x}" cy="${pos[i].y}" r="30" fill="${i === 0 ? '#10b981' : '#2563eb'}"/>`;
+                html += `<text x="${pos[i].x}" y="${pos[i].y + 5}" text-anchor="middle" fill="white" font-weight="bold" font-size="14">${label}</text>`;
+            });
+            svg.innerHTML = html;
+        }
+
+        function nextRelax() {
+            const steps = [
+                {txt: "Inisialisasi: jarak[s1]=0, lainnya=∞", st: "{s1: 0, s2: ∞, s3: ∞, s4: ∞}"},
+                {txt: "Periksa edge(s1,s2): 0+1 < ∞ → update", st: "{s1: 0, s2: 1, s3: ∞, s4: ∞}"},
+                {txt: "Periksa edge(s1,s3): 0+1 < ∞ → update", st: "{s1: 0, s2: 1, s3: 1, s4: ∞}"},
+                {txt: "Periksa edge(s1,s4): 0+1 < ∞ → update", st: "{s1: 0, s2: 1, s3: 1, s4: 1}"},
+                {txt: "Periksa edge(s2,s3): 1+1 > 1 → tidak berubah", st: "{s1: 0, s2: 1, s3: 1, s4: 1}"},
+                {txt: "Periksa edge(s2,s4): 1+1 > 1 → tidak berubah", st: "{s1: 0, s2: 1, s3: 1, s4: 1}"},
+                {txt: "Periksa edge(s3,s4): 1+1 > 1 → tidak berubah", st: "{s1: 0, s2: 1, s3: 1, s4: 1}"},
+                {txt: "✓ Selesai! Semua jalur ditemukan", st: "AKHIR: {s1: 0, s2: 1, s3: 1, s4: 1}"}
+            ];
+
+            if (relaxStep < steps.length) {
+                document.getElementById('relax-status').innerHTML = `<strong>${steps[relaxStep].txt}</strong><br>Jarak: ${steps[relaxStep].st}`;
+                gambarRelax();
+                relaxStep++;
+            } else {
+                document.getElementById('relax-status').innerHTML = `<strong>Simulasi selesai!</strong><br>Klik "Atur Ulang" untuk ulang`;
+            }
+        }
+
+        function resetRelax() {
+            relaxStep = 0;
+            document.getElementById('relax-status').innerHTML = '<strong>Status:</strong> <span>Klik "Langkah Berikutnya" untuk mulai</span>';
+            gambarRelax();
+        }
+
+        // ==================== COMPLEXITY ====================
+        function hitungKompleksitas() {
+            const n = parseInt(document.getElementById('calc-n').value);
+            const v = n, e = n * (n - 1) / 2;
+            const ss = v * e, ap = v * v * e;
+            document.getElementById('calc-result').innerHTML = `
+                <strong>Mesh ${n} node:</strong><br>
+                Vertex (V): ${v}<br>
+                Edge (E): ${e.toLocaleString()}<br><br>
+                <strong>Kompleksitas:</strong><br>
+                Sumber Tunggal: O(${ss.toLocaleString()})<br>
+                Semua Pasangan: O(${ap.toLocaleString()})
+            `;
+        }
+
+        // ==================== BOOT SIMULATION ====================
+        function mulaiBoot() {
+            if (bootTimer) clearInterval(bootTimer);
+            const bar = document.getElementById('boot-bar');
+            const log = document.getElementById('boot-log');
+            bootProg = 0;
+            bar.style.width = '0%';
+            bar.textContent = '0%';
+            log.innerHTML = '<div>[MULAI] Simulasi dimulai...</div>';
+
+            bootTimer = setInterval(() => {
+                bootProg++;
+                bar.style.width = bootProg + '%';
+                bar.textContent = bootProg + '%';
+
+                let msg = '';
+                if (bootProg === 10) msg = '[INFO] Iterasi monitor pertama';
+                else if (bootProg === 20) msg = '[INFO] Ditemukan 50 switch, 1225 tautan';
+                else if (bootProg === 30) msg = '[CALC] Bellman-Ford dimulai...';
+                else if (bootProg === 50) msg = '[CALC] MST dihitung';
+                else if (bootProg === 70) msg = '[CALC] Iterasi 1/50 selesai';
+                else if (bootProg === 90) msg = '[INFO] Topologi stabil';
+                else if (bootProg === 100) {
+                    msg = '[SUKSES] Lalu lintas diizinkan!';
+                    clearInterval(bootTimer);
+                }
+
+                if (msg) {
+                    const d = document.createElement('div');
+                    d.textContent = msg;
+                    log.appendChild(d);
+                    log.scrollTop = log.scrollHeight;
+                }
+            }, 80);
+        }
+
+        function resetBoot() {
+            if (bootTimer) clearInterval(bootTimer);
+            bootProg = 0;
+            document.getElementById('boot-bar').style.width = '0%';
+            document.getElementById('boot-bar').textContent = '0%';
+            document.getElementById('boot-log').innerHTML = '[BOOT] Menunggu...';
+        }
+
+        // ==================== TABS ====================
+        function gantiTab(btn, id) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // ==================== NETWORK CANVAS ====================
+        function buatJaringan() {
+            const num = parseInt(document.getElementById('slider').value);
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth || 700;
+            canvas.height = 400;
+
+            nodes = [];
+            const cx = canvas.width / 2, cy = canvas.height / 2;
+            const r = Math.min(cx, cy) - 60;
+
+            for (let i = 0; i < num; i++) {
+                const angle = (2 * Math.PI * i) / num - Math.PI / 2;
+                nodes.push({
+                    x: cx + r * Math.cos(angle),
+                    y: cy + r * Math.sin(angle),
+                    id: i + 1
+                });
+            }
+            gambarCanvas();
+        }
+
+        function gambarCanvas() {
+            const canvas = document.getElementById('canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Edges
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
+                    ctx.stroke();
+                }
+            }
+
+            // Animated packet
+            if (isAnimating && nodes.length >= 2) {
+                const s = nodes[0], e = nodes[nodes.length - 1];
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(e.x, e.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const px = s.x + (e.x - s.x) * packetProg;
+                const py = s.y + (e.y - s.y) * packetProg;
+                ctx.beginPath();
+                ctx.arc(px, py, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = '#10b981';
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('P', px, py);
+            }
+
+            // Flows
+            flows.forEach(f => {
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(f.from.x, f.from.y);
+                ctx.lineTo(f.to.x, f.to.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            });
+
+            // Nodes
+            nodes.forEach(n => {
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 20, 0, 2 * Math.PI);
+                ctx.fillStyle = n.id === 1 ? '#10b981' : '#2563eb';
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('s' + n.id, n.x, n.y);
+            });
+
+            if (isAnimating) {
+                packetProg += 0.02;
+                if (packetProg >= 1) {
+                    packetProg = 0;
+                    isAnimating = false;
+                    flows.push({from: nodes[0], to: nodes[nodes.length - 1]});
+                    document.getElementById('flow-status').textContent = `Flow: h1 → h${nodes.length} (1 hop, selesai)`;
+                }
+                animId = requestAnimationFrame(gambarCanvas);
+            }
+        }
+
+        function kirimPaket() {
+            if (nodes.length < 2) buatJaringan();
+            isAnimating = true;
+            packetProg = 0;
+            document.getElementById('flow-status').textContent = 'Mengirim paket...';
+            if (animId) cancelAnimationFrame(animId);
+            gambarCanvas();
+        }
+
+        function hapusFlow() {
+            isAnimating = false;
+            packetProg = 0;
+            flows = [];
+            document.getElementById('flow-status').textContent = 'Tidak ada flow aktif';
+            if (animId) cancelAnimationFrame(animId);
+            gambarCanvas();
+        }
+
+        // ==================== SIMULATION ====================
+        function initSim() {
+            const c = document.getElementById('sim-container');
+            c.innerHTML = '';
+            SIM_STEPS.forEach((s, i) => {
+                const d = document.createElement('div');
+                d.className = 'step';
+                d.id = 'step-' + i;
+                d.innerHTML = `<div class="step-number">${i + 1}</div><h4>${s.t}: ${s.title}</h4><p>${s.desc}</p>`;
+                c.appendChild(d);
+            });
+        }
+
+        function nextSim() {
+            if (simIdx < SIM_STEPS.length) {
+                if (simIdx > 0) {
+                    const prev = document.getElementById('step-' + (simIdx - 1));
+                    if (prev) prev.classList.remove('active');
+                }
+                const cur = document.getElementById('step-' + simIdx);
+                if (cur) {
+                    cur.classList.add('active');
+                    cur.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    document.querySelector('#sim-state span').textContent =
+                        `${SIM_STEPS[simIdx].t}: ${SIM_STEPS[simIdx].title} — ${SIM_STEPS[simIdx].desc}`;
+                }
+                simIdx++;
+            } else {
+                document.querySelector('#sim-state span').textContent = 'Simulasi selesai! Klik "Atur Ulang" untuk ulang.';
+            }
+        }
+
+        function resetSim() {
+            simIdx = 0;
+            initSim();
+            document.querySelector('#sim-state span').textContent = 'Siap untuk memulai';
+        }
+
+        function autoSim() {
+            resetSim();
+            setTimeout(() => {
+                autoTimer = setInterval(() => {
+                    if (simIdx < SIM_STEPS.length) nextSim();
+                    else clearInterval(autoTimer);
+                }, 1500);
+            }, 100);
+        }
+
+        // ==================== QUIZ ====================
+        function cekJawaban(el, benar) {
+            const parent = el.parentElement;
+            const feedback = parent.nextElementSibling;
+            parent.querySelectorAll('.quiz-option').forEach(o => {
+                o.classList.remove('correct', 'incorrect');
+                o.style.pointerEvents = 'none';
+            });
+
+            if (benar) {
+                el.classList.add('correct');
+                el.classList.add('pulse');
+                feedback.className = 'quiz-feedback show success';
+                if (!el.dataset.jawab) {
+                    quizSkor++;
+                    el.dataset.jawab = 'true';
+                    document.getElementById('quiz-skor').textContent = quizSkor;
+                }
+            } else {
+                el.classList.add('incorrect');
+                feedback.className = 'quiz-feedback show error';
+                setTimeout(() => {
+                    const correct = parent.querySelector('[onclick*="true"]');
+                    if (correct) correct.classList.add('correct');
+                }, 500);
+            }
+        }
+
+        function resetKuis() {
+            quizSkor = 0;
+            document.getElementById('quiz-skor').textContent = '0';
+            document.querySelectorAll('.quiz-option').forEach(o => {
+                o.classList.remove('correct', 'incorrect');
+                o.style.pointerEvents = 'auto';
+                delete o.dataset.jawab;
+            });
+            document.querySelectorAll('.quiz-feedback').forEach(f => f.style.display = 'none');
+        }
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            gambarMesh(5);
+            gambarRelax();
+            initSim();
+            buatJaringan();
+        });
+    </script>
+</body>
+</html>
